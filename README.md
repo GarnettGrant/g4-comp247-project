@@ -1,4 +1,6 @@
 # g4-comp247-project
+Created By: Group 4 - Damien Liscio, Cole Ramsey, Victor Zorn, Garnett Grant
+
 Group Project – Developing a predictive machine learning model (classifier) and deploy it as a web API for inference
 
 1) Purpose
