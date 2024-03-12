@@ -104,4 +104,6 @@ The reported  dataset is intended to provide communities with information regard
 
 <a href="https://data.torontopolice.on.ca/datasets/TorontoPS::ksi/about">KSI dataset</a>
 
+Use the download tab and select spreadsheet to download the dataset as a csv file, also download the pdf guide the describes the metadata and navigate to the specific section that describes the KSI dataset. You can find the guide at this link PUBLIC SAFETY DATA PORTAL: OPEN DATA DOCUMENTATION 
+
 
