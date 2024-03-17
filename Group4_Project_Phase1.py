@@ -25,19 +25,22 @@ column_types = KSI_data.dtypes # get column types
 column_missing_data = KSI_data.isnull().sum() # get sum of missing values for each column
 column_descriptions = KSI_data.describe() # get column descriptions
 
+# print name, number of missing values, and data type for each column
+print(KSI_data.info())
+
 # loop through each column
 for column in column_names:
     # check if column is in list of columns that have descriptions
+    column_description = '\nColumn Description'
     if column in column_descriptions:
-        # display column names, types and descriptions
-        print('Column Name:', column, 'Column Type:', column_types[column],
-              'Sum Of Column Missing Values:', column_missing_data[column],
-              '\nColumn Description:\n', column_descriptions[column], '\n')
+        column_description += ':\n' + column_descriptions[column]
     else:
-        # display column names and types for those without descriptions
-        print('Column Name:', column, 'Column Type:', column_types[column],
-              'Sum Of Column Missing Values:', column_missing_data[column],
-              '\nColumn Description Not Available\n')
+        column_description += ' Not Available'
+    
+    # display column names, types and descriptions (if applicable)
+    print('Column Name:', column, 'Column Type:', column_types[column],
+          'Sum Of Column Missing Values:', column_missing_data[column],
+          column_description, '\n')
 
 # plot quantity of each injury type by year
 injury_type_counts = KSI_data.groupby(['YEAR', 'INJURY']).size().unstack(fill_value=0) # get quantities for injury counts by year
