@@ -5,9 +5,9 @@ Final Project: Phase 1
 File name:     Group4_Project_Phase1.py
 Student names: Damien Liscio
                Cole Ramsey
-               Victor Zorn (301197146)
+               Victor Zorn
                Garnett Grant
-Due date: Mar. 17, 2024
+Due date:      Mar. 17, 2024
 """
 
 # imports
