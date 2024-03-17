@@ -2,10 +2,11 @@
 
 Created by Group 4:
 
+- Garnett Grant
 - Damien Liscio
 - Cole Ramsey
+- Avalon Stanley
 - Victor Zorn
-- Garnett Grant
 
 ---
 

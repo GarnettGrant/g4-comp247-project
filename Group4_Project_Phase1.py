@@ -3,10 +3,11 @@ COMP247-402
 Final Project: Phase 1
 
 File name:     Group4_Project_Phase1.py
-Student names: Damien Liscio
+Student names: Garnett Grant
+               Damien Liscio
                Cole Ramsey
+               Avalon Stanley
                Victor Zorn
-               Garnett Grant
 Due date:      Mar. 17, 2024
 """
 
@@ -14,6 +15,12 @@ Due date:      Mar. 17, 2024
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.compose import make_column_selector as selector
+from sklearn.model_selection import train_test_split
 
 # Section 1: Data exploration
 
@@ -37,15 +44,15 @@ for column in column_names:
         column_description += ':\n' + str(column_descriptions[column])
     else:
         column_description += ' Not Available'
-    
+
     # display column names, types and descriptions (if applicable)
-    print('Column Name:', column, 'Column Type:', column_types[column],
-          'Sum Of Column Missing Values:', column_missing_data[column],
+    print('Column Name:', column, '\nColumn Type:', column_types[column],
+          '\nSum Of Column Missing Values:', column_missing_data[column],
           column_description, '\n')
 
-# plot quantity of each injury type by year
+# plot quantity of each injury type by year as bar graph
 injury_type_counts = KSI_data.groupby(['YEAR', 'INJURY']).size().unstack(fill_value=0) # get quantities for injury counts by year
-injury_type_counts.plot(kind='bar', stacked=True, figsize=(8,6)) # plot data as bar graph
+injury_type_counts.plot(kind='bar', stacked=True, figsize=(8,6))
 plt.xlabel('Year')
 plt.ylabel('Number of Reports Per Injury Type')
 plt.title('Quantity of Injury Type by Year')
@@ -73,7 +80,7 @@ plt.ylabel('Count')
 plt.xticks(rotation=45)
 plt.show()
 
-# plotting numbner of road accidents by impact type for each injury category.
+# plotting number of road accidents by impact type for each injury category
 accident_count = KSI_data.groupby(['IMPACTYPE',  'INJURY']).size().unstack(fill_value=0) 
 accident_count = accident_count.reset_index()
 accident_count.plot(kind='bar', stacked=True, figsize=(12,8))
@@ -93,3 +100,36 @@ plt.title('Number of Accidents by Road Class and Location Coordinates')
 plt.xticks(rotation=20)
 plt.legend(title='Location Coordinates')
 plt.show()
+
+# Section 2: Data modelling
+
+# preprocessing for numerical data
+numerical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler', StandardScaler())
+])
+
+# preprocessing for categorical data
+categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))
+])
+
+# bundling preprocessing for num and cat data
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numerical_transformer, selector(dtype_include=['int64', 'float64'])),
+        ('cat', categorical_transformer, selector(dtype_include=object))
+    ]
+)
+
+# dropping rows where ACCLASS data is NaN
+KSI_data.dropna(subset=['ACCLASS'], inplace=True)
+
+# splitting dataset into training and testing sets
+X = KSI_data.drop(['ACCLASS'], axis=1)
+y = KSI_data['ACCLASS']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+print(X_train.head())
+print(y_train.head())
