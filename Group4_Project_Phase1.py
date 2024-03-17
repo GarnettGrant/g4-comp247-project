@@ -13,6 +13,7 @@ Due date: Mar. 17, 2024
 # imports
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Section 1: Data exploration
 
@@ -49,4 +50,46 @@ plt.xlabel('Year')
 plt.ylabel('Number of Reports Per Injury Type')
 plt.title('Quantity of Injury Type by Year')
 plt.legend(title='Injury Type')
+plt.show()
+
+# calculating the correlations of data 
+corr = KSI_data.select_dtypes(include=['float64', 'int64']).corr()
+# plotting correlation heatmap
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm')
+plt.title('Feature Correlation Heatmap')
+plt.show()
+
+# plotting the frequency of 'ALCOHOL' involvement in fatal accidents
+# replacing NaN values in ALCOHOL column with "No"
+KSI_data['ALCOHOL'] = KSI_data['ALCOHOL'].fillna('No')
+print(KSI_data['ALCOHOL'].value_counts())
+fatal_accidents = KSI_data[KSI_data['ACCLASS'] == 'Fatal']
+plt.figure(figsize=(8, 6))
+sns.countplot(data=fatal_accidents, x='ALCOHOL')
+plt.title('Frequency of Alcohol Involvement in Fatal Accidents')
+plt.xlabel('Alcohol Involvement')
+plt.ylabel('Count')
+plt.xticks(rotation=45)
+plt.show()
+
+# plotting numbner of road accidents by impact type for each injury category.
+accident_count = KSI_data.groupby(['IMPACTYPE',  'INJURY']).size().unstack(fill_value=0) 
+accident_count = accident_count.reset_index()
+accident_count.plot(kind='bar', stacked=True, figsize=(12,8))
+plt.xticks(range(len(accident_count['IMPACTYPE'])), accident_count['IMPACTYPE'], rotation=30)
+plt.xlabel('Impact Type')
+plt.ylabel('Number of Accidents')
+plt.title('Quantity of Injury Type by Impact Type')
+plt.legend(title='Impact Type')
+plt.show()
+
+# plotting number of road accidents given the road class and location ordinants
+accident_counts = KSI_data.groupby(['ROAD_CLASS', 'LOCCOORD']).size().unstack(fill_value=0)
+accident_counts.plot(kind='bar', stacked=True, figsize=(8,6))
+plt.xlabel('Road Class')
+plt.ylabel('Number of Reports')
+plt.title('Number of Accidents by Road Class and Location Coordinates')
+plt.xticks(rotation=20)
+plt.legend(title='Location Coordinates')
 plt.show()
