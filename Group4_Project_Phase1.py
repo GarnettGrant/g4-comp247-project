@@ -33,7 +33,7 @@ for column in column_names:
     # check if column is in list of columns that have descriptions
     column_description = '\nColumn Description'
     if column in column_descriptions:
-        column_description += ':\n' + column_descriptions[column]
+        column_description += ':\n' + str(column_descriptions[column])
     else:
         column_description += ' Not Available'
     
@@ -44,8 +44,7 @@ for column in column_names:
 
 # plot quantity of each injury type by year
 injury_type_counts = KSI_data.groupby(['YEAR', 'INJURY']).size().unstack(fill_value=0) # get quantities for injury counts by year
-plt.figure(figsize=(8,6))
-injury_type_counts.plot(kind='bar', stacked=True) # plot data as bar graph
+injury_type_counts.plot(kind='bar', stacked=True, figsize=(8,6)) # plot data as bar graph
 plt.xlabel('Year')
 plt.ylabel('Number of Reports Per Injury Type')
 plt.title('Quantity of Injury Type by Year')
