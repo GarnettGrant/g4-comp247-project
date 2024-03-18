@@ -89,6 +89,26 @@ plt.xticks(rotation=20)
 plt.legend(title='Location Coordinates')
 plt.show()
 
+# plotting number of road accidents for each hour of the day
+# convert time to string and fill with 0's if necessary
+KSI_data['TIME'] = KSI_data['TIME'].astype(str).str.zfill(4)
+# create function to return appropriate time range for accident
+def time_ranges(time):
+    hour = int(time[:2])
+    hour_range_start = hour // 1 * 1  
+    return f'{hour_range_start:02d}:00-{hour_range_start:02d}:59'
+# create new column with ranges as values
+KSI_data['TimeRange'] = KSI_data['TIME'].apply(time_ranges)
+# get counts for each range and plot 
+time_range_counts = KSI_data.groupby('TimeRange').size()
+time_range_counts.plot(kind='bar', figsize=(10, 6))
+plt.xlabel('Time (1 hr intervals)')
+plt.ylabel('Number of Road Accidents')
+plt.title('Number of Accidents by Hour in 24 Hour Period')
+plt.xticks(rotation=45)  
+plt.tight_layout() 
+plt.show()
+
 # Section 2: Data modelling
 
 # preprocessing for numerical data
