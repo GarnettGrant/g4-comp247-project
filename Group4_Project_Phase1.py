@@ -27,28 +27,16 @@ from sklearn.model_selection import train_test_split
 # load KSI dataset into data frame
 KSI_data = pd.read_csv('KSI.csv')
 
-# basic column exploration
-column_names = KSI_data.columns # get column names
-column_types = KSI_data.dtypes # get column types
-column_missing_data = KSI_data.isnull().sum() # get sum of missing values for each column
-column_descriptions = KSI_data.describe() # get column descriptions
+# preliminary data exploration
+print(KSI_data.head())
 
 # print name, number of missing values, and data type for each column
 print(KSI_data.info())
 
-# loop through each column
-for column in column_names:
-    # check if column is in list of columns that have descriptions
-    column_description = '\nColumn Description'
-    if column in column_descriptions:
-        column_description += ':\n' + str(column_descriptions[column])
-    else:
-        column_description += ' Not Available'
-
-    # display column names, types and descriptions (if applicable)
-    print('Column Name:', column, '\nColumn Type:', column_types[column],
-          '\nSum Of Column Missing Values:', column_missing_data[column],
-          column_description, '\n')
+# display column description only if column has description
+column_descriptions = KSI_data.describe()
+for column in column_descriptions.columns:
+    print(column_descriptions[column], '\n')
 
 # plot quantity of each injury type by year as bar graph
 injury_type_counts = KSI_data.groupby(['YEAR', 'INJURY']).size().unstack(fill_value=0) # get quantities for injury counts by year
