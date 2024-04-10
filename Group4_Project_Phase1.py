@@ -47,7 +47,7 @@ plt.title('Quantity of Injury Type by Year')
 plt.legend(title='Injury Type')
 plt.show()
 
-# calculating the correlations of data 
+# calculating correlations
 corr = KSI_data.select_dtypes(include=['float64', 'int64']).corr()
 # plotting correlation heatmap
 plt.figure(figsize=(10, 8))
@@ -69,7 +69,7 @@ plt.xticks(rotation=45)
 plt.show()
 
 # plotting number of road accidents by impact type for each injury category
-accident_count = KSI_data.groupby(['IMPACTYPE',  'INJURY']).size().unstack(fill_value=0) 
+accident_count = KSI_data.groupby(['IMPACTYPE', 'INJURY']).size().unstack(fill_value=0) 
 accident_count = accident_count.reset_index()
 accident_count.plot(kind='bar', stacked=True, figsize=(12,8))
 plt.xticks(range(len(accident_count['IMPACTYPE'])), accident_count['IMPACTYPE'], rotation=30)
