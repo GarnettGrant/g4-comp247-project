@@ -29,11 +29,12 @@ from sklearn.svm import SVC
 from scipy.stats import loguniform, randint
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.decomposition import TruncatedSVD
 
 # Section 1: Data exploration
 
 # load KSI dataset into data frame
-KSI_data = pd.read_csv("C:/Users/coles/Downloads/KSI.csv")
+KSI_data = pd.read_csv("C:/Users/damie/Downloads/KSI.csv")
 
 # preliminary data exploration
 print(KSI_data.head())
@@ -143,7 +144,7 @@ preprocessor = ColumnTransformer(
 KSI_data.dropna(subset=['ACCLASS'], inplace=True)
 
 # splitting dataset into training and testing sets
-X = KSI_data.drop(['ACCLASS'], axis=1)
+X = KSI_data.drop(['ACCLASS', 'X', 'Y', 'INDEX_', 'ACCNUM', 'YEAR', 'DATE', 'STREET1', 'STREET2', 'OFFSET', 'WARDNUM', 'LOCCOORD', 'ACCLOC', 'FATAL_NO', 'HOOD_158', 'NEIGHBOURHOOD_158', 'HOOD_140', 'NEIGHBOURHOOD_140', 'DIVISION', 'ObjectId', 'PEDTYPE', 'PEDACT', 'PEDCOND', 'CYCLISTYPE', 'CYCACT', 'CYCCOND'], axis=1)
 y = KSI_data['ACCLASS']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -178,10 +179,10 @@ param_grid_lr = {
 }
 
 # setting up grid search
-grid_search_lr = GridSearchCV(estimator=pipeline_lr, param_grid=param_grid_lr, cv=5, scoring='accuracy', verbose=1)
+grid_search_lr = GridSearchCV(estimator=pipeline_lr, param_grid=param_grid_lr, cv=5, scoring='accuracy', verbose=1, n_jobs=-1)
 
 # setting up random grid search
-random_search_lr = RandomizedSearchCV(estimator=pipeline_lr, param_distributions=param_dist_lr, n_iter=20, cv=5, scoring='accuracy', verbose=1, random_state=42)
+random_search_lr = RandomizedSearchCV(estimator=pipeline_lr, param_distributions=param_dist_lr, n_iter=20, cv=5, scoring='accuracy', verbose=1, random_state=42, n_jobs=-1)
 
 # fitting grid search
 grid_search_lr.fit(X_train, y_train)
@@ -222,10 +223,10 @@ param_dist_dt = {
 }
 
 # setting up grid search
-grid_search_dt = GridSearchCV(estimator=pipeline_dt, param_grid=param_grid_dt, cv=5, scoring='accuracy', verbose=1)
+grid_search_dt = GridSearchCV(estimator=pipeline_dt, param_grid=param_grid_dt, cv=5, scoring='accuracy', verbose=1, n_jobs=-1)
 
 # setting up random grid search
-random_search_dt = RandomizedSearchCV(estimator=pipeline_dt, param_distributions=param_dist_dt, n_iter=20, cv=5, scoring='accuracy', verbose=1, random_state=42)
+random_search_dt = RandomizedSearchCV(estimator=pipeline_dt, param_distributions=param_dist_dt, n_iter=20, cv=5, scoring='accuracy', verbose=1, random_state=42, n_jobs=-1)
 
 # fitting grid search
 grid_search_dt.fit(X_train, y_train)
@@ -312,10 +313,10 @@ param_dist_rf = {
 }
 
 # setting up grid search
-grid_search_rf = GridSearchCV(estimator=pipeline_rf_grid, param_grid=param_grid_rf, cv=5, scoring='accuracy', verbose=1)
+grid_search_rf = GridSearchCV(estimator=pipeline_rf_grid, param_grid=param_grid_rf, cv=5, scoring='accuracy', verbose=1, n_jobs=-1)
 
 # setting up random grid search
-random_search_rf = RandomizedSearchCV(estimator=pipeline_rf_grid, param_distributions=param_dist_rf, n_iter=20, cv=5, scoring='accuracy', verbose=1, random_state=42)
+random_search_rf = RandomizedSearchCV(estimator=pipeline_rf_grid, param_distributions=param_dist_rf, n_iter=20, cv=5, scoring='accuracy', verbose=1, random_state=42, n_jobs=-1)
 
 # fitting grid search
 grid_search_rf.fit(X_train, y_train)
@@ -336,48 +337,48 @@ print("Best score for Random Forest (Randomized):", random_search_rf.best_score_
 
 ################
 # neural networks
-#early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-
 # model pipeline
-#pipeline_nn = Pipeline([
-#    ('preprocessor', preprocessor),
-#    ('classifier', MLPClassifier(max_iter=1000, random_state=42, callbacks=[early_stopping]))
-#])
+pipeline_nn = Pipeline([
+    ('preprocessor', preprocessor),
+    ('svd', TruncatedSVD(n_components=50)),
+    ('classifier', MLPClassifier(max_iter=100, random_state=42, early_stopping=True, validation_fraction=0.1, n_iter_no_change=5))
+])
 
 # gridsearchcv params
-#param_grid_nn = {
-#    'classifier__hidden_layer_sizes': [(50,), (100,), (50,50)],
-#    'classifier__activation': ['tanh', 'relu'],
-#    'classifier__solver': ['sgd', 'adam'],
-#    'classifier__alpha': [0.0001, 0.05]
-#}
+param_grid_nn = {
+    'classifier__hidden_layer_sizes': [(50,)],
+    'classifier__activation': ['tanh'],
+    'classifier__alpha': [0.0001],
+    'classifier__learning_rate_init': [0.001]
+}
 
 # randomizedsearchcv params
-#param_dist_nn = {
-#    'classifier__hidden_layer_sizes': [(50,), (100,)],
-#    'classifier__activation': ['tanh', 'relu'],
-#    'classifier__alpha': [0.0001, 0.001, 0.01]
-#}
+param_dist_nn = {
+    'classifier__hidden_layer_sizes': [(50,), (100,)],
+    'classifier__activation': ['tanh', 'relu'],
+    'classifier__alpha': loguniform(1e-4, 1e-2),
+    'classifier__learning_rate_init': loguniform(1e-4, 1e-2)
+}
 
 # setting up grid search
-#grid_search_nn = GridSearchCV(estimator=pipeline_nn_grid, param_grid=param_grid_nn, cv=5, scoring='accuracy', verbose=1)
+grid_search_nn = GridSearchCV(estimator=pipeline_nn, param_grid=param_grid_nn, cv=3, scoring='accuracy', verbose=1)
 
 # setting up random grid search
-#random_search_nn = RandomizedSearchCV(estimator=pipeline_nn, param_distributions=param_dist_nn, n_iter=10, cv=3, scoring='accuracy', verbose=1, random_state=42)
+random_search_nn = RandomizedSearchCV(estimator=pipeline_nn, param_distributions=param_dist_nn, n_iter=10, cv=3, scoring='accuracy', verbose=1, random_state=42)
 
 # fitting grid search
-#grid_search_nn.fit(X_train, y_train)
+grid_search_nn.fit(X_train, y_train)
 
 # fitting random grid search
-#random_search_nn.fit(X_train, y_train)
+random_search_nn.fit(X_train, y_train)
 
 # best params and best score NEURAL NETWORK
-#print("Best parameters for Neural Network (Grid Search):", grid_search_nn.best_params_)
-#print("Best score for Neural Network (Grid Search):", grid_search_nn.best_score_)
+print("Best parameters for Neural Network (Grid Search):", grid_search_nn.best_params_)
+print("Best score for Neural Network (Grid Search):", grid_search_nn.best_score_)
 
 # best params and best score randomized grid search NEURAL NETWORK
-#print("Best parameters for Neural Network (Randomized):", random_search_nn.best_params_)
-#print("Best score for Neural Network (Randomized):", random_search_nn.best_score_)
+print("Best parameters for Neural Network (Randomized):", random_search_nn.best_params_)
+print("Best score for Neural Network (Randomized):", random_search_nn.best_score_)
 
 
 
@@ -420,4 +421,4 @@ evaluate_model('Logistic Regression', grid_search_lr.best_estimator_, X_test, y_
 evaluate_model('Decision Tree', grid_search_dt.best_estimator_, X_test, y_test)
 evaluate_model('SVM', grid_search_svm.best_estimator_, X_test, y_test)
 evaluate_model('Random Forest', grid_search_rf.best_estimator_, X_test, y_test)
-#evaluate_model('Neural Network', grid_search_nn.best_estimator_, X_test, y_test)   
+evaluate_model('Neural Network', grid_search_nn.best_estimator_, X_test, y_test)   
