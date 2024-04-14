@@ -1,14 +1,14 @@
 """
 COMP247-402
-Final Project: Phase 1
+Final Project: Phase 2
 
-File name:     Group4_Project_Phase1.py
+File name:     Group4_Project_Phase2.py
 Student names: Garnett Grant
                Damien Liscio
                Cole Ramsey
                Avalon Stanley
                Victor Zorn
-Due date:      Mar. 17, 2024
+Due date:      Apr. 14, 2024
 """
 
 # imports
@@ -31,7 +31,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.decomposition import TruncatedSVD
 
-# Section 1: Data exploration
+"""Section 1: Data exploration"""
 
 # load KSI dataset into data frame
 KSI_data = pd.read_csv('KSI.csv')
@@ -120,7 +120,7 @@ plt.xticks(rotation=45)
 plt.tight_layout() 
 plt.show()
 
-# Section 2: Data modelling
+"""Section 2: Data modelling"""
 
 # preprocessing for numerical data
 numerical_transformer = Pipeline(steps=[
@@ -185,13 +185,10 @@ y = KSI_data['ACCLASS']
 # splitting dataset into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-############
-# Section 3: Predictive model building
-############
+"""Section 3: Predictive model building"""
 
-
-#################
 # logistic regression
+
 # model pipeline
 pipeline_lr = Pipeline([
     ('preprocessor', preprocessor),
@@ -230,10 +227,10 @@ print("Best score for Logistic Regression:", grid_search_lr.best_score_)
 print("Best parameters for Logistic Regression (Randomized):", random_search_lr.best_params_)
 print("Best score for Logistic Regression (Randomized):", random_search_lr.best_score_)
 
-
-
 ################
+
 # decision trees
+
 # model pipeline
 pipeline_dt = Pipeline([
     ('preprocessor', preprocessor),
@@ -274,11 +271,10 @@ print("Best score for Decision Tree:", grid_search_dt.best_score_)
 print("Best parameters for Decision Tree (Randomized):", random_search_dt.best_params_)
 print("Best score for Decision Tree (Randomized):", random_search_dt.best_score_)
 
-
-
-
 ################
+
 # SVM
+
 # model pipeline
 pipeline_svm = Pipeline([
     ('preprocessor', preprocessor),
@@ -318,10 +314,10 @@ print("Best score for SVM:", grid_search_svm.best_score_)
 print("Best parameters for SVM (Randomized):", random_search_svm.best_params_)
 print("Best score for SVM (Randomized):", random_search_svm.best_score_)
 
-
-
 ################
+
 # random forest
+
 # model pipeline
 pipeline_rf_grid = Pipeline([
     ('preprocessor', preprocessor),
@@ -364,11 +360,10 @@ print("Best score for Random Forest (Grid Search):", grid_search_rf.best_score_)
 print("Best parameters for Random Forest (Randomized):", random_search_rf.best_params_)
 print("Best score for Random Forest (Randomized):", random_search_rf.best_score_)
 
-
-
-
 ################
+
 # neural networks
+
 # model pipeline
 pipeline_nn = Pipeline([
     ('preprocessor', preprocessor),
@@ -412,31 +407,27 @@ print("Best score for Neural Network (Grid Search):", grid_search_nn.best_score_
 print("Best parameters for Neural Network (Randomized):", random_search_nn.best_params_)
 print("Best score for Neural Network (Randomized):", random_search_nn.best_score_)
 
-
-
-############
-# Section 4: Model scoring and evaluation
-############
+"""Section 4: Model scoring and evaluation"""
 
 def evaluate_model(name, model, features, labels):
     pred = model.predict(features)
     acc = accuracy_score(labels, pred)
     print(f'Accuracy of {name}: {acc:.2f}')
-    
-    #confusion matrix
+
+    # confusion matrix
     print("Confusion Matrix:")
     print(confusion_matrix(labels, pred))
-    
-    #classification report
+
+    # classification report
     print("Classification Report:")
     print(classification_report(labels, pred, zero_division=1))
-    
-    #computing ROC curve and ROC area for each class
+
+    # computing ROC curve and ROC area for each class
     pred_prob = model.predict_proba(features)[:, 1]
     fpr, tpr, _ = roc_curve(labels, pred_prob, pos_label=model.classes_[1])
     roc_auc = auc(fpr, tpr)
-    
-    #plotting
+
+    # plotting
     plt.figure()
     plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
     plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
@@ -447,8 +438,8 @@ def evaluate_model(name, model, features, labels):
     plt.title(f'Receiver operating characteristic of {name}')
     plt.legend(loc="lower right")
     plt.show()
-    
-#evaluating each model
+
+# evaluating each model
 evaluate_model('Logistic Regression', grid_search_lr.best_estimator_, X_test, y_test)
 evaluate_model('Decision Tree', grid_search_dt.best_estimator_, X_test, y_test)
 evaluate_model('SVM', grid_search_svm.best_estimator_, X_test, y_test)
