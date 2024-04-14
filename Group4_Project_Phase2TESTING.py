@@ -33,7 +33,7 @@ from sklearn.decomposition import TruncatedSVD
 
 """Section 1: Data exploration"""
 
-# load KSI dataset into data frame
+# load KSI dataset into dataframe
 KSI_data = pd.read_csv('KSI.csv')
 
 # preliminary data exploration
@@ -56,16 +56,16 @@ plt.title('Quantity of Injury Type by Year')
 plt.legend(title='Injury Type')
 plt.show()
 
-# calculating correlations
+# calculate correlations
 corr = KSI_data.select_dtypes(include=['float64', 'int64']).corr()
-# plotting correlation heatmap
+# plot correlation heatmap
 plt.figure(figsize=(10, 8))
 sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm')
 plt.title('Feature Correlation Heatmap')
 plt.show()
 
-# plotting the frequency of 'ALCOHOL' involvement in fatal accidents
-# replacing NaN values in ALCOHOL column with "No"
+# plot the frequency of 'ALCOHOL' involvement in fatal accidents
+# replace NaN values in ALCOHOL column with "No"
 KSI_data['ALCOHOL'] = KSI_data['ALCOHOL'].fillna('No')
 print(KSI_data['ALCOHOL'].value_counts())
 fatal_accidents = KSI_data[KSI_data['ACCLASS'] == 'Fatal']
@@ -77,7 +77,7 @@ plt.ylabel('Count')
 plt.xticks(rotation=45)
 plt.show()
 
-# plotting number of road accidents by impact type for each injury category
+# plot number of road accidents by impact type for each injury category
 accident_count = KSI_data.groupby(['IMPACTYPE', 'INJURY']).size().unstack(fill_value=0) 
 accident_count = accident_count.reset_index()
 accident_count.plot(kind='bar', stacked=True, figsize=(12,8))
@@ -88,7 +88,7 @@ plt.title('Quantity of Injury Type by Impact Type')
 plt.legend(title='Impact Type')
 plt.show()
 
-# plotting number of road accidents given the road class and location ordinants
+# plot number of road accidents given the road class and location ordinants
 accident_counts = KSI_data.groupby(['ROAD_CLASS', 'LOCCOORD']).size().unstack(fill_value=0)
 accident_counts.plot(kind='bar', stacked=True, figsize=(8,6))
 plt.xlabel('Road Class')
@@ -98,7 +98,7 @@ plt.xticks(rotation=20)
 plt.legend(title='Location Coordinates')
 plt.show()
 
-# plotting number of road accidents for each hour of the day
+# plot number of road accidents for each hour of the day
 # store original TIME columns
 time_col = KSI_data['TIME'].copy()
 # convert time to string and fill with 0's if necessary
@@ -120,7 +120,7 @@ plt.xticks(rotation=45)
 plt.tight_layout() 
 plt.show()
 
-"""Section 2: Data modelling"""
+"""Section 2: Data modeling"""
 
 # preprocessing for numerical data
 numerical_transformer = Pipeline(steps=[
@@ -134,7 +134,7 @@ categorical_transformer = Pipeline(steps=[
     ('onehot', OneHotEncoder(handle_unknown='ignore'))
 ])
 
-# bundling preprocessing for num and cat data
+# bundle preprocessing for num and cat data
 preprocessor = ColumnTransformer(
     transformers=[
         ('num', numerical_transformer, selector(dtype_include=['int64', 'float64'])),
@@ -142,7 +142,7 @@ preprocessor = ColumnTransformer(
     ]
 )
 
-# dropping rows where ACCLASS data is NaN
+# drop rows where ACCLASS data is NaN
 KSI_data.dropna(subset=['ACCLASS'], inplace=True)
 
 # make ACCLASS binary by replacing 'Property Damage Only' with 'Non-Fatal Injury'
@@ -182,7 +182,7 @@ features_to_drop = ['ACCLASS', 'INJURY', 'OFFSET', 'FATAL_NO', 'DRIVACT',
 X = KSI_data.drop(features_to_drop, axis=1)
 y = KSI_data['ACCLASS']
 
-# splitting dataset into training and testing sets
+# split dataset into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 """Section 3: Predictive model building"""
@@ -207,16 +207,16 @@ param_grid_lr = {
     'classifier__max_iter': [2000, 5000, 10000]
 }
 
-# setting up grid search
+# set up grid search
 grid_search_lr = GridSearchCV(estimator=pipeline_lr, param_grid=param_grid_lr, cv=5, scoring='accuracy', verbose=1, n_jobs=-1)
 
-# setting up random grid search
+# set up random grid search
 random_search_lr = RandomizedSearchCV(estimator=pipeline_lr, param_distributions=param_dist_lr, n_iter=20, cv=5, scoring='accuracy', verbose=1, random_state=42, n_jobs=-1)
 
-# fitting grid search
+# fit grid search
 grid_search_lr.fit(X_train, y_train)
 
-# fitting random grid search
+# fit random grid search
 random_search_lr.fit(X_train, y_train)
 
 # best params and best score grid search LOGISTIC REGRESSION
@@ -251,16 +251,16 @@ param_dist_dt = {
     'classifier__min_samples_leaf': randint(1, 10)
 }
 
-# setting up grid search
+# set up grid search
 grid_search_dt = GridSearchCV(estimator=pipeline_dt, param_grid=param_grid_dt, cv=5, scoring='accuracy', verbose=1, n_jobs=-1)
 
-# setting up random grid search
+# set up random grid search
 random_search_dt = RandomizedSearchCV(estimator=pipeline_dt, param_distributions=param_dist_dt, n_iter=20, cv=5, scoring='accuracy', verbose=1, random_state=42, n_jobs=-1)
 
-# fitting grid search
+# fit grid search
 grid_search_dt.fit(X_train, y_train)
 
-# fitting random grid search
+# fit random grid search
 random_search_dt.fit(X_train, y_train)
 
 # best params and best score DECISION TREE
@@ -294,16 +294,16 @@ param_dist_svm = {
     'classifier__kernel': ['rbf']
 }
 
-# setting up grid search
+# set up grid search
 grid_search_svm = GridSearchCV(estimator=pipeline_svm, param_grid=param_grid_svm, cv=3, scoring='accuracy', verbose=1, n_jobs=-1)
 
-# setting up random grid search
+# set up random grid search
 random_search_svm = RandomizedSearchCV(estimator=pipeline_svm, param_distributions=param_dist_svm, n_iter=10, cv=3, scoring='accuracy', verbose=1, n_jobs=-1, random_state=42)
 
-# fitting grid search
+# fit grid search
 grid_search_svm.fit(X_train, y_train)
 
-# fitting random grid search
+# fit random grid search
 random_search_svm.fit(X_train, y_train)
 
 # best params and best score SVM
@@ -340,16 +340,16 @@ param_dist_rf = {
     'classifier__min_samples_leaf': randint(1, 10)
 }
 
-# setting up grid search
+# set up grid search
 grid_search_rf = GridSearchCV(estimator=pipeline_rf_grid, param_grid=param_grid_rf, cv=5, scoring='accuracy', verbose=1, n_jobs=-1)
 
-# setting up random grid search
+# set up random grid search
 random_search_rf = RandomizedSearchCV(estimator=pipeline_rf_grid, param_distributions=param_dist_rf, n_iter=20, cv=5, scoring='accuracy', verbose=1, random_state=42, n_jobs=-1)
 
-# fitting grid search
+# fit grid search
 grid_search_rf.fit(X_train, y_train)
 
-# fitting random grid search
+# fit random grid search
 random_search_rf.fit(X_train, y_train)
 
 # best params and best score RANDOM FOREST
@@ -387,16 +387,16 @@ param_dist_nn = {
     'classifier__learning_rate_init': loguniform(1e-4, 1e-2)
 }
 
-# setting up grid search
+# set up grid search
 grid_search_nn = GridSearchCV(estimator=pipeline_nn, param_grid=param_grid_nn, cv=3, scoring='accuracy', verbose=1)
 
-# setting up random grid search
+# set up random grid search
 random_search_nn = RandomizedSearchCV(estimator=pipeline_nn, param_distributions=param_dist_nn, n_iter=10, cv=3, scoring='accuracy', verbose=1, random_state=42)
 
-# fitting grid search
+# fit grid search
 grid_search_nn.fit(X_train, y_train)
 
-# fitting random grid search
+# fit random grid search
 random_search_nn.fit(X_train, y_train)
 
 # best params and best score NEURAL NETWORK
@@ -422,7 +422,7 @@ def evaluate_model(name, model, features, labels):
     print("Classification Report:")
     print(classification_report(labels, pred, zero_division=1))
 
-    # computing ROC curve and ROC area for each class
+    # compute ROC curve and ROC area for each class
     pred_prob = model.predict_proba(features)[:, 1]
     fpr, tpr, _ = roc_curve(labels, pred_prob, pos_label=model.classes_[1])
     roc_auc = auc(fpr, tpr)
@@ -439,9 +439,9 @@ def evaluate_model(name, model, features, labels):
     plt.legend(loc="lower right")
     plt.show()
 
-# evaluating each model
+# evaluate each model
 evaluate_model('Logistic Regression', grid_search_lr.best_estimator_, X_test, y_test)
 evaluate_model('Decision Tree', grid_search_dt.best_estimator_, X_test, y_test)
 evaluate_model('SVM', grid_search_svm.best_estimator_, X_test, y_test)
 evaluate_model('Random Forest', grid_search_rf.best_estimator_, X_test, y_test)
-evaluate_model('Neural Network', grid_search_nn.best_estimator_, X_test, y_test)   
+evaluate_model('Neural Network', grid_search_nn.best_estimator_, X_test, y_test)
