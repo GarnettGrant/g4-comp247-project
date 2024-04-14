@@ -34,7 +34,7 @@ from sklearn.decomposition import TruncatedSVD
 # Section 1: Data exploration
 
 # load KSI dataset into data frame
-KSI_data = pd.read_csv("C:/Users/damie/Downloads/KSI.csv")
+KSI_data = pd.read_csv('KSI.csv')
 
 # preliminary data exploration
 print(KSI_data.head())
@@ -99,6 +99,8 @@ plt.legend(title='Location Coordinates')
 plt.show()
 
 # plotting number of road accidents for each hour of the day
+# store original TIME columns
+time_col = KSI_data['TIME'].copy()
 # convert time to string and fill with 0's if necessary
 KSI_data['TIME'] = KSI_data['TIME'].astype(str).str.zfill(4)
 # create function to return appropriate time range for accident
@@ -143,15 +145,45 @@ preprocessor = ColumnTransformer(
 # dropping rows where ACCLASS data is NaN
 KSI_data.dropna(subset=['ACCLASS'], inplace=True)
 
-# splitting dataset into training and testing sets
-X = KSI_data.drop(['ACCLASS', 'X', 'Y', 'INDEX_', 'ACCNUM', 'YEAR', 'DATE', 'STREET1', 'STREET2', 'OFFSET', 'WARDNUM', 'LOCCOORD', 'ACCLOC', 'FATAL_NO', 'HOOD_158', 'NEIGHBOURHOOD_158', 'HOOD_140', 'NEIGHBOURHOOD_140', 'DIVISION', 'ObjectId', 'PEDTYPE', 'PEDACT', 'PEDCOND', 'CYCLISTYPE', 'CYCACT', 'CYCCOND'], axis=1)
+# make ACCLASS binary by replacing 'Property Damage Only' with 'Non-Fatal Injury'
+KSI_data['ACCLASS'].replace('Property Damage Only', 'Non-Fatal Injury', inplace=True)
+
+# revert changes made to time column
+KSI_data['TIME'] = time_col
+
+# drop TimeRange column
+KSI_data.drop(['TimeRange'], axis=1, inplace=True)
+
+# replace missing values with "No" in various features
+# this was already done to ALCOHOL in Section 1
+values = {
+    'PEDESTRIAN': 'No',
+    'CYCLIST': 'No',
+    'AUTOMOBILE': 'No',
+    'MOTORCYCLE': 'No',
+    'TRUCK': 'No',
+    'TRSN_CITY_VEH': 'No',
+    'EMERG_VEH': 'No',
+    'PASSENGER': 'No',
+    'SPEEDING': 'No',
+    'AG_DRIV': 'No',
+    'REDLIGHT': 'No',
+    'DISABILITY': 'No'
+}
+KSI_data.fillna(value=values, inplace=True)
+
+# feature selection
+features_to_drop = ['ACCLASS', 'INJURY', 'OFFSET', 'FATAL_NO', 'DRIVACT',
+                    'DRIVCOND', 'PEDTYPE', 'PEDACT', 'PEDCOND', 'CYCLISTYPE',
+                    'CYCACT', 'CYCCOND', 'YEAR', 'DATE', 'X', 'Y', 'STREET1',
+                    'STREET2', 'DISTRICT', 'WARDNUM', 'ACCLOC', 'HOOD_158',
+                    'NEIGHBOURHOOD_158', 'HOOD_140', 'NEIGHBOURHOOD_140',
+                    'DIVISION', 'INDEX_', 'ACCNUM', 'ObjectId']
+X = KSI_data.drop(features_to_drop, axis=1)
 y = KSI_data['ACCLASS']
+
+# splitting dataset into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-print(X_train.head())
-print(y_train.head())
-
-
 
 ############
 # Section 3: Predictive model building
