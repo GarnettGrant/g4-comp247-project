@@ -2,7 +2,7 @@
 COMP247-402
 Final Project: Phase 2
 
-File name:     Group4_Project_Phase2.py
+File name:     project.py
 Student names: Garnett Grant
                Damien Liscio
                Cole Ramsey
@@ -30,6 +30,7 @@ from scipy.stats import loguniform, randint
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.decomposition import TruncatedSVD
+import pickle
 
 """Section 1: Data exploration"""
 
@@ -445,3 +446,6 @@ evaluate_model('Decision Tree', grid_search_dt.best_estimator_, X_test, y_test)
 evaluate_model('SVM', grid_search_svm.best_estimator_, X_test, y_test)
 evaluate_model('Random Forest', grid_search_rf.best_estimator_, X_test, y_test)
 evaluate_model('Neural Network', grid_search_nn.best_estimator_, X_test, y_test)
+
+with open('model.pkl', 'wb') as f:
+    pickle.dump(grid_search_dt.best_estimator_, f)
